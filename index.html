@@ -21,6 +21,28 @@
 		.navbar-brand img {
 			margin: -12px 7px 0 0;
 		}
+		
+		body > div.container {
+			margin-top: 70px;
+		}
+		
+		h4 {
+			margin: 20px 0;
+		}
+		
+		#av1, #av2 {
+			color: orangered;
+		}
+		
+		td .glyphicon-ok {
+			margin-left: 10px;
+			color: forestgreen;
+		}
+		
+		td .glyphicon-alert {
+			margin-left: 10px;
+			color: orangered;
+		}
 	</style>
 </head>
 <body data-spy="scroll" data-target=".navbar" data-offset="60">
@@ -47,6 +69,43 @@
 		</div>
 	</nav>
 	<div class="container">
+		<form class="form-horizontal">
+			<div class="form-group">
+				<label for="attrib1" class="col-sm-3 control-label">First data attribute:</label>
+				<div class="col-sm-3">
+					<select class="form-control" id="attrib1"></select>
+				</div>
+			
+				<label for="attrib2" class="col-sm-3 control-label">Second data attribute:</label>
+				<div class="col-sm-3">
+					<select class="form-control" id="attrib2"></select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="attrib_val1" class="col-sm-3 control-label">First value:</label>
+				<div class="col-sm-3">
+					<select class="form-control" id="attrib_val1"></select>
+				</div>
+				
+				<label for="attrib_val2" class="col-sm-3 control-label">Second value:</label>
+				<div class="col-sm-3">
+					<select class="form-control" id="attrib_val2"></select>
+				</div>
+			</div>
+		</form>
+		<div class="row">
+			<h4>Currently viewing <span id="av1">...</span> (<span id="a1">...</span>) with <span id="av2">...</span> (<span id="a2">...</span>)</h4>
+		</div>
+		<form>
+		<table class="table table-hover" id="task_rationale">
+			<thead>
+				<th>#</th><th>Task Name</th><th>Ranking</th><th>Rationale</th><th>Strategies</th>
+			</thead>
+			<tbody>
+				
+			</tbody>
+		</table>
+		</form>
 		<div id="SizeAndClasses">
 			
 		</div>
