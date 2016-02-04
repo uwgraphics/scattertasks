@@ -92,6 +92,13 @@ $("#attrib1, #attrib2").on('change', function() {
     // have to coax the number to boolean, this isn't just bad style :)
     subOptions.filter(d => d.is_default_attrib_val == true).attr('selected', 'selected');
     
+    // disable those options in attrib2 that are <= attrib1 (and similarly for attrib1 >= attrib2)
+    $("#attrib1 option, #attrib2 option").removeProp('disabled');
+    d3.selectAll("#attrib2 option").filter(d => d.attribute_id == d3.select("#attrib1").property('value'))
+        .attr('disabled', 'disabled');
+    d3.selectAll("#attrib1 option").filter(d => d.attribute_id == d3.select("#attrib2").property('value'))
+        .attr('disabled', 'disabled');
+    
     if (!firstTime) $('#attrib_val1').trigger('change');
     firstTime = false;
 });
@@ -101,6 +108,14 @@ $("#attrib_val1, #attrib_val2").on('change', function() {
     
     av1 = d3.select("#attrib_val1").property('value');
     av2 = d3.select("#attrib_val2").property('value');
+    
+    // make sure av1 is always smaller (for DB access) swap if so
+    if (av1 > av2) {
+        var tmp;
+        tmp = av1;
+        av1 = av2;
+        av2 = tmp;
+    }
     
     if (av1 != av2) {
         $("#av1").html($("#attrib_val1 option:selected").text());
@@ -134,8 +149,6 @@ var populateReasons = function(data: Rationale[]) {
 };
 
 var populateReasonsTR = function(data: Rationale[]) {
-    console.log(data);  
-    
     // we expect to have all 12 tasks, so just remove everything from the table
     d3.selectAll('tr.reason').remove();
     
@@ -198,6 +211,7 @@ var editField = function(thisDatum: Rationale) {
                 
         thisField.selectAll("option").filter(d => d.ranking_name == curValue)
             .attr('selected', 'selected');
+        $("select", this).focus();
             
         thisField.select('select').on('blur', function(d) {
             var selection = $("option:selected", this);
@@ -215,6 +229,11 @@ var editField = function(thisDatum: Rationale) {
             }, function(retData) {
                 if (retData.result == "success") {
                     thisField.html(selection.text() + '<span class="glyphicon glyphicon-ok"></span>');
+                    thisField.select(".glyphicon-ok").transition()
+                        .delay(5000)
+                        .duration(500)
+                        .style('opacity', '1e-6')
+                        .remove();
                     d3.selectAll('tr.reason').filter(d => d.task_id == thisDatum.task_id)
                         .classed('success', selection.text() == "Yes")
                         .classed('warning', selection.text() == "Doable")
@@ -242,7 +261,7 @@ var editField = function(thisDatum: Rationale) {
                 event.preventDefault();
                 $(this).trigger('blur');
             } 
-        });
+        }).focus();
         
         thisField.select('input').on('blur', function(d) {
             var enteredText = $(this).val();
@@ -258,6 +277,11 @@ var editField = function(thisDatum: Rationale) {
             $.getJSON("utils/commitEdit.php", paramObj, function(retData) {
                if (retData.result == "success") {
                    thisField.html(enteredText + '<span class="glyphicon glyphicon-ok"></span>');
+                   thisField.select(".glyphicon-ok").transition()
+                    .delay(5000)
+                    .duration(500)
+                    .style('opacity', '1e-6')
+                    .remove();
                 } else {
                     thisField.html(enteredText + '<span class="glyphicon glyphicon-alert" data-toggle="tooltip" title="' + retData.message + '"></span>');
                 }
