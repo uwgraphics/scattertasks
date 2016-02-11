@@ -158,7 +158,9 @@ var populateReasonsTR = function(data: Rationale[]) {
         .append('tr')
         .attr('class', d => {
             switch (d.ranking_name) {
-                case "No":
+                case "Need support":
+                case "Nonsensical":
+                case "Impossible":
                     return 'reason danger';
                 case "Doable":
                     return 'reason warning';
@@ -237,7 +239,7 @@ var editField = function(thisDatum: Rationale) {
                     d3.selectAll('tr.reason').filter(d => d.task_id == thisDatum.task_id)
                         .classed('success', selection.text() == "Yes")
                         .classed('warning', selection.text() == "Doable")
-                        .classed('danger', selection.text() == "No");
+                        .classed('danger', ["Need support", "Nonsensical", "Impossible"].indexOf(selection.text()) != -1);
                 } else {
                     thisField.html(selection.text() + '<span class="glyphicon glyphicon-alert" data-toggle="tooltip" title="' + retData.message + '"></span>')
                 }
@@ -254,7 +256,8 @@ var editField = function(thisDatum: Rationale) {
             textType = 'strategies';
         
         if (curValue == "??") curValue = "";
-        thisField.html('<input id="' + fieldID + '" class="form-control" value="' + curValue + '" />');
+        thisField.html('<input id="' + fieldID + '" class="form-control" />');
+        thisField.select('input').attr('value', curValue);
         
         $("input", this).keypress(function(event) { 
             if (event.charCode == 13) {
