@@ -32,10 +32,16 @@
 		
 		h4 {
 			margin: 20px 0;
+			line-height: 1.4em;
+			text-align: center;
 		}
 		
-		#av1, #av2 {
-			color: orangered;
+		.a1, #a1, #av1 {
+			color: #7570b3;
+		}
+		
+		.a2, #a2, #av2 {
+			color: #d95f02;
 		}
 		
 		td .glyphicon-ok {
@@ -73,32 +79,46 @@
 		</div>
 	</nav>
 	<div class="container">
-		<form class="form-horizontal">
-			<div class="form-group">
-				<label for="attrib1" class="col-sm-3 control-label">First data attribute:</label>
-				<div class="col-sm-3">
-					<select class="form-control" id="attrib1"></select>
-				</div>
-			
-				<label for="attrib2" class="col-sm-3 control-label">Second data attribute:</label>
-				<div class="col-sm-3">
-					<select class="form-control" id="attrib2"></select>
-				</div>
-			</div>
-			<div class="form-group">
-				<label for="attrib_val1" class="col-sm-3 control-label">First value:</label>
-				<div class="col-sm-3">
-					<select class="form-control" id="attrib_val1"></select>
-				</div>
-				
-				<label for="attrib_val2" class="col-sm-3 control-label">Second value:</label>
-				<div class="col-sm-3">
-					<select class="form-control" id="attrib_val2"></select>
-				</div>
-			</div>
-		</form>
 		<div class="row">
-			<h4>Currently viewing <span id="av1">...</span> (<span id="a1">...</span>) with <span id="av2">...</span> (<span id="a2">...</span>)</h4>
+			<div class="col-sm-6">
+			<form class="form-horizontal">
+				<div class="form-group a1">
+					<label for="attrib1" class="col-sm-6 control-label">First data attribute:</label>
+					<div class="col-sm-6">
+						<select class="form-control" id="attrib1"></select>
+					</div>
+				</div>
+				<div class="form-group a1">					
+					<label for="attrib_val1" class="col-sm-6 control-label">First value:</label>
+					<div class="col-sm-6">
+						<select class="form-control" id="attrib_val1"></select>
+					</div>
+				</div>
+				<div class="form-group a2">				
+					<label for="attrib2" class="col-sm-6 control-label">Second data attribute:</label>
+					<div class="col-sm-6">
+						<select class="form-control" id="attrib2"></select>
+					</div>
+				</div>
+				<div class="form-group a2">					
+					<label for="attrib_val2" class="col-sm-6 control-label">Second value:</label>
+					<div class="col-sm-6">
+						<select class="form-control" id="attrib_val2"></select>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-sm-12">
+						<h4>Currently viewing <span id="a1">...</span> (<span id="av1">...</span>) with <span id="a2">...</span> (<span id="av2">...</span>)</h4>
+					</div>
+				</div>
+			</form>
+			</div>
+			<div class="col-sm-6">
+				<svg id="graph" width="400" height="300"></svg>
+			</div>
+		</div>
+		<div class="row">
+			
 		</div>
 		<form>
 		<table class="table table-hover" id="task_rationale">
