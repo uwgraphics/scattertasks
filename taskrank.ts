@@ -60,6 +60,8 @@ module Scattertasks {
         public av1: number = -1;
         public av2: number = -1;
         
+        scatterVis: ExampleVis;
+        
         constructor(tableSelector: d3.Selection<any>) {
             this.tableSelector = tableSelector;
         }
@@ -71,6 +73,9 @@ module Scattertasks {
             this.default_attribs = data.default_attribs;
             this.attrib_values = data.attrib_values;
             this.rankings = data.rankings;
+            
+            this.scatterVis = new ExampleVis(d3.select('svg#example'), this.default_attribs);
+            this.scatterVis.updateVis();
             
             d3.selectAll("#attrib1, #attrib2").selectAll('option')
                 .data(this.attrib_values, d => d.attribute_id.toString()).enter()
@@ -102,6 +107,7 @@ module Scattertasks {
             
             this.populateReasonsTR(noBlanksData);
             this.tableSelector.selectAll('td.editable').on('click', this.editField(this));
+            this.scatterVis.updateVis([+this.av1, +this.av2]);
         };
     
         populateReasonsTR(data: Rationale[]) {
