@@ -21,7 +21,8 @@
 	"showOutput": "silent",
 
 	// args is the HelloWorld program to compile.
-	"args": ["-out", "scattertasks.js", "scattertasks.ts"],
+	//"args": ["-out", "js/scattertasks.js", "js/scattertasks.ts"],
+	"args": ["--rootDir", "js", "--outFile", "js/scattertasks.js", "js/scattertasks.ts"],
 
 	// use the standard tsc problem matcher to find compile problems
 	// in the output.
