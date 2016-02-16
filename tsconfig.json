@@ -2,6 +2,11 @@
 	"compilerOptions": {
 		"target": "ES5",
 		"module": "amd",
-		"sourceMap": true
-	}
+		"sourceMap": true,
+		"out": "js/scattertasks.js"
+	},
+	"files": [
+		"typings/tsd.d.ts",
+		"js/scattertasks.ts"
+	]
 }

@@ -1,4 +1,3 @@
-/// <reference path="../typings/tsd.d.ts" />
 /// <reference path="taskrank.ts" />
 /// <reference path="exampleVis.ts" />
 
