@@ -35,8 +35,8 @@ $(document).ready(() => {
     });
     
     $("#attrib_val1, #attrib_val2").on('change', function() {
-        tableData.av1 = d3.select("#attrib_val1").property('value');
-        tableData.av2 = d3.select("#attrib_val2").property('value');
+        tableData.av1 = +d3.select("#attrib_val1").property('value');
+        tableData.av2 = +d3.select("#attrib_val2").property('value');
         
         // make sure av1 is always smaller (for DB access) swap if so
         if (tableData.av1 > tableData.av2) {
