@@ -100,9 +100,24 @@ module Scattertasks {
 					}
 					break;
 				case DataDistrib.Linear:
-					var r = 0.7 + (Math.random() * 0.3);  // try to limit this from r = 0.7 to 1
+					//var r = 0.7 + (Math.random() * 0.3);  // try to limit this from r = 0.7 to 1
+					var r = Math.random();
+					console.log("r value is %.3f", r);
+					var λ = (r - Math.sqrt(r * r - Math.pow(r, 4))) / (2 * r * r - 1);
 					for (var i = 0; i < this.curAttribs.numPoints; i++) {
 						// see Rensink2010 (equation 1) for generating points
+						// use Box-Muller transform to generate uniform points (std dev 20% of extent)
+						var u1 = Math.random(); var u2 = Math.random();
+						var x = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2) * 
+							(0.2 * this.xExtent) + (0.5 * this.xExtent);
+						var y0 = Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2) * 
+							(0.2 * this.xExtent) + (0.5 * this.xExtent);
+						var y1 = (λ * x + (1 - λ) * y0) / Math.sqrt(λ * λ + Math.pow(1 - λ, 2));
+						this.data.push({
+							x: x, 
+							y: y1, 
+							category: Math.ceil(Math.random() * numClasses)
+						});
 					}
 					break;
 				default:
@@ -154,7 +169,7 @@ module Scattertasks {
 		
 		// construct a mapping from data attribute value to scatterplot value
 		updateDataAttribs(dataAttrib: number[], doDefault?: boolean) {
-			var baseAttribs: any = this.defaultAttribs || {};
+			var baseAttribs: any = {};
 			dataAttrib.forEach(da => {
 				switch (da) {
 					case 1:
@@ -218,7 +233,9 @@ module Scattertasks {
 			});
 			
 			if (doDefault) this.defaultAttribs = baseAttribs;
-			this.curAttribs = baseAttribs;
+			
+			// handy jQuery method -- merge found attributes with the defaults and save as current
+			this.curAttribs = $.extend({}, this.defaultAttribs, baseAttribs);
 		}
 	}
 }
