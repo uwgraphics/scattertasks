@@ -71,6 +71,67 @@ module Scattertasks {
 			this.updateDataAttribs(defaultAttribs.map(d => +d.attrib_value_id), true);	
 		}
 		
+		// uses the Box-Muller method to generate normal noise
+		private generateNormalPoints(numPoints: number, mean: number | [number, number], 
+			stdDev: number | [number, number], maxMultipleDev: number | [number, number], 
+			classLabel: number, λ?: number): DataPoint[] 
+		{
+			var points: DataPoint[] = [];
+			
+			var xDev: number, yDev: number;
+			if (stdDev instanceof Array) {
+				xDev = stdDev[0];
+				yDev = stdDev[1];
+			} else if (typeof stdDev === 'number') {
+				xDev = yDev = stdDev;
+			}
+			
+			var xMean: number, yMean: number;
+			if (mean instanceof Array) {
+				xMean = mean[0];
+				yMean = mean[1];
+			} else if (typeof mean === 'number') {
+				xMean = yMean = mean;
+			}
+			
+			var xMD: number, yMD: number;
+			if (maxMultipleDev instanceof Array) {
+				xMD = maxMultipleDev[0];
+				yMD = maxMultipleDev[1];
+			} else if (typeof maxMultipleDev === 'number') {
+				xMD = yMD = maxMultipleDev;
+			}
+			
+			
+			for (var i = 0; i < numPoints; i++) {
+				var firstRun = true;
+				var x: number, y: number;
+				while (firstRun || 
+					Math.abs(x - xMean) > xDev * xMD || 
+					Math.abs(y - yMean) > yDev * yMD) 
+				{
+					firstRun = false;
+					var u1 = Math.random();
+					var u2 = Math.random();
+					x = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2) * xDev + xMean;
+					y = Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2) * yDev + yMean;
+					
+					// use λ to create noise (see Rensink2010)
+					if (λ !== undefined) {
+						y = (λ * x + (1 - λ) * y) / Math.sqrt(λ * λ + Math.pow(1 - λ, 2));
+					}
+				}
+				
+				points.push({
+					x: x,
+					y: y,
+					category: classLabel
+				});
+			}
+			
+			return points;
+		}
+		
 		// given a complete set of data attributes, generate a sample scatterplot
 		private generateData() {
 			this.data = [];
@@ -100,25 +161,18 @@ module Scattertasks {
 					}
 					break;
 				case DataDistrib.Linear:
-					//var r = 0.7 + (Math.random() * 0.3);  // try to limit this from r = 0.7 to 1
-					var r = Math.random();
-					console.log("r value is %.3f", r);
-					var λ = (r - Math.sqrt(r * r - Math.pow(r, 4))) / (2 * r * r - 1);
-					for (var i = 0; i < this.curAttribs.numPoints; i++) {
-						// see Rensink2010 (equation 1) for generating points
-						// use Box-Muller transform to generate uniform points (std dev 20% of extent)
-						var u1 = Math.random(); var u2 = Math.random();
-						var x = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2) * 
-							(0.2 * this.xExtent) + (0.5 * this.xExtent);
-						var y0 = Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2) * 
-							(0.2 * this.xExtent) + (0.5 * this.xExtent);
-						var y1 = (λ * x + (1 - λ) * y0) / Math.sqrt(λ * λ + Math.pow(1 - λ, 2));
-						this.data.push({
-							x: x, 
-							y: y1, 
-							category: Math.ceil(Math.random() * numClasses)
-						});
-					}
+					for (var i = 0; i < numClasses; i++) {
+						var r = 0.7 + (Math.random() * 0.3);  // try to limit this from r = 0.7 to 1
+						console.log("r value is %.3f", r);
+					
+						var λ = (r - Math.sqrt(r * r - Math.pow(r, 4))) / (2 * r * r - 1);
+						this.data = this.data.concat(
+							this.generateNormalPoints(
+								Math.ceil(this.curAttribs.numPoints / numClasses), 
+								0.5 * this.xExtent, 0.2 * this.xExtent, 2.5, i, λ
+							)
+						);
+					};
 					break;
 				default:
 					throw "Data distribution not implemented";
