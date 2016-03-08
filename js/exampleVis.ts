@@ -74,9 +74,14 @@ module Scattertasks {
 		// uses the Box-Muller method to generate normal noise
 		private generateNormalPoints(numPoints: number, mean: number | [number, number], 
 			stdDev: number | [number, number], maxMultipleDev: number | [number, number], 
-			classLabel: number, λ?: number): DataPoint[] 
+			classLabel: number, r?: number): DataPoint[] 
 		{
 			var points: DataPoint[] = [];
+            
+            // linear correlation noise (see Rensink2010)
+            var λ = 0;
+            if (r !== undefined)
+                λ = (r - Math.sqrt(r * r - Math.pow(r, 4))) / (2 * r * r - 1);
 			
 			var xDev: number, yDev: number;
 			if (stdDev instanceof Array) {
@@ -117,9 +122,7 @@ module Scattertasks {
 					y = Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2) * yDev + yMean;
 					
 					// use λ to create noise (see Rensink2010)
-					if (λ !== undefined) {
-						y = (λ * x + (1 - λ) * y) / Math.sqrt(λ * λ + Math.pow(1 - λ, 2));
-					}
+                    y = (λ * x + (1 - λ) * y) / Math.sqrt(λ * λ + Math.pow(1 - λ, 2));
 				}
 				
 				points.push({
@@ -165,15 +168,77 @@ module Scattertasks {
 						var r = 0.7 + (Math.random() * 0.3);  // try to limit this from r = 0.7 to 1
 						console.log("r value is %.3f", r);
 					
-						var λ = (r - Math.sqrt(r * r - Math.pow(r, 4))) / (2 * r * r - 1);
 						this.data = this.data.concat(
 							this.generateNormalPoints(
 								Math.ceil(this.curAttribs.numPoints / numClasses), 
-								0.5 * this.xExtent, 0.2 * this.xExtent, 2.5, i, λ
+								0.5 * this.xExtent, 0.2 * this.xExtent, 2.5, i, r
 							)
 						);
 					};
 					break;
+				case DataDistrib.Clusters:
+					for (var i = 0; i < numClasses; i++) {
+						//var thisNumPoints = Math.ceil(this.curAttribs.numPoints / numClasses);
+                        var thisNumPoints = this.curAttribs.numPoints;
+						var numClusters = Math.ceil(Math.random() * 6);
+						for (var c = 0; c < numClusters; c++) {
+							var centroid: [number, number] = [Math.random() * 10, Math.random() * 10];
+							var stdDev = Math.random() * 0.7 + 0.5;
+							this.data = this.data.concat(
+                                this.generateNormalPoints(
+                                    Math.ceil(thisNumPoints / numClusters),
+                                    centroid, stdDev, 
+                                    Math.random() * 2 + 1, i)
+                            );
+						}
+					}
+					break;
+                    
+                case DataDistrib.Manifolds:
+                    var chooseDist = () => {
+                        var r = Math.ceil(Math.random() * 5);
+                        var r1 = Math.random();
+                        var r2 = Math.random();
+                        var r3 = Math.random();
+                        switch (r) {
+                            case 1: 
+                                return Math.floor;
+                            case 2:
+                                return (num) => Math.pow(num, 2);
+                            case 3:
+                                return (num) => (r1 * 2 + 1) * Math.cos(num + r3) + ((r2 * 6) + 3);
+                            case 4:
+                                return (num) => (r1 * 2 + 1) * Math.sin(num + r3) + ((r2 * 6) + 3);
+                            case 5: 
+                                return (num) => Math.log(num) + ((r2 * 7) + 2);
+                        }
+                    }
+                
+                    for (var i = 0; i < numClasses; i++) {
+                        var dist = chooseDist();
+                        //var thisNumPoints = Math.ceil(this.curAttribs.numPoints / numClasses);
+                        var thisNumPoints = this.curAttribs.numPoints;
+
+                        var thesePoints: DataPoint[] = 
+                            this.generateNormalPoints(thisNumPoints, this.xExtent / 2, this.xExtent / 4, 2, i, 0.98);
+                            
+                        thesePoints.forEach(d => {
+                            d.y = dist(d.y);
+                        });
+                        
+                        this.data = this.data.concat(thesePoints);
+                        
+                           
+                        // var xSpacing = this.xExtent / thisNumPoints;
+                        // for (var n = 1; n <= thisNumPoints; n++) {
+                        //     this.data.push({
+                        //         x: n * xSpacing,
+                        //         y: dist(n * xSpacing),
+                        //         category: i
+                        //     });
+                        // }
+                    }
+                    break;
 				default:
 					throw "Data distribution not implemented";
 			}
