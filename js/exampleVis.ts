@@ -39,7 +39,7 @@ module Scattertasks {
 		category?: number;
 	}
 	
-	interface Margin {
+	export interface Margin {
 		left: number;
 		right: number;
 		top: number;
@@ -237,6 +237,26 @@ module Scattertasks {
                         //         category: i
                         //     });
                         // }
+                    }
+                    break;
+                case DataDistrib.Overlap:
+                    var ptsPerClass = this.curAttribs.numPoints / numClasses; 
+                    for (var c = 0; c < numClasses; c++) {
+                        var thisPts = ptsPerClass + (Math.random() * this.curAttribs.numPoints / 10 - (this.curAttribs.numPoints / 20)); 
+                        var numClusters = thisPts/ (Math.floor(Math.random() * 2) + 2);
+                        var ptsPerCluster = thisPts / numClusters;
+                        
+                        for (var i = 0; i < numClusters; i++) {
+                            var ptsHere = ptsPerCluster + (Math.random() * thisPts / 10 - (thisPts / 20));
+                            
+                            this.data = this.data.concat(
+                                this.generateNormalPoints(
+                                    ptsHere, 
+                                    [Math.random() * this.xExtent, Math.random() * this.yExtent],
+                                    0.05, 4, c
+                                )
+                            );   
+                        }
                     }
                     break;
 				default:

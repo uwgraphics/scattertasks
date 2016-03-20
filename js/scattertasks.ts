@@ -1,5 +1,6 @@
 /// <reference path="taskrank.ts" />
 /// <reference path="exampleVis.ts" />
+/// <reference path="rankingVis.ts" />
 
 $(document).ready(() => {
     
@@ -23,7 +24,7 @@ $(document).ready(() => {
         // have to coax the number to boolean, this isn't just bad style :)
         subOptions.filter(d => d.is_default_attrib_val == true).attr('selected', 'selected');
         
-        // disable those options in attrib2 that are <= attrib1 (and similarly for attrib1 >= attrib2)
+        // disable those options in attrib2 that are = attrib1 (and similarly for attrib1 = attrib2)
         $("#attrib1 option, #attrib2 option").removeProp('disabled');
         d3.selectAll("#attrib2 option").filter(d => d.attribute_id == d3.select("#attrib1").property('value'))
             .attr('disabled', 'disabled');
@@ -37,6 +38,7 @@ $(document).ready(() => {
     $("#attrib_val1, #attrib_val2").on('change', function() {
         tableData.av1 = +d3.select("#attrib_val1").property('value');
         tableData.av2 = +d3.select("#attrib_val2").property('value');
+        tableData.a2 = +d3.select("#attrib2").property('value');
         
         // make sure av1 is always smaller (for DB access) swap if so
         if (tableData.av1 > tableData.av2) {
@@ -53,6 +55,7 @@ $(document).ready(() => {
             $("#a2").html($("#attrib2 option:selected").text());
             
             $.getJSON("utils/getTaskRationale.php", {"av1": tableData.av1, "av2": tableData.av2}, tableData.populateReasons);
+            tableData.rankingVis.getRankings(tableData.av1, tableData.a2);
         }
     });
 });
