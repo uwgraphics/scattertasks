@@ -8,12 +8,19 @@ module Scattertasks {
     }
     
     interface Ranking {
-        category: string,
+        category: string;
         task_id: number;
         task: string;
         ranking: string;
         rank: number;
         value: number;
+    }
+    
+    interface RankMin {
+        xpos: number;
+        ypos: number;
+        task?: string;
+        task_id?: number;
     }
     
     export class RankingVis {
@@ -79,8 +86,10 @@ module Scattertasks {
         updateVis() {
             console.log("updating ranking vis");
             
+            this.chart.selectAll("g.tasks").remove();
+            
             var xDomain = this.rankings[0].map(e => e.category);
-            var yDomain = d3.range(12).map(d => "" + d); 
+            var yDomain = d3.range(12).map(d => "" + d);
             
             var x = d3.scale.ordinal()
                 .domain(xDomain)
@@ -90,29 +99,74 @@ module Scattertasks {
                 .domain(yDomain)
                 .rangeRoundBands([0, this.height], 0.2);
                 
-            var taskColors = d3.scale.category10()
-                .domain(d3.range(12).map(d => ""+d));
+            // hack to get lines to span the whole graph
+            var rankingData = this.rankings.map(t => {
+                var ret: RankMin[] = [];
+                ret[0] = {
+                    'xpos': 0,
+                    'ypos': y(""+t[0].rank),
+                    'task_id': t[0].task_id
+                };
+                ret = ret.concat(t.map(r => {
+                    return {
+                        'xpos': x(r.category) + x.rangeBand() / 2,
+                        'ypos': y("" + r.rank),
+                        'task': r.task 
+                    };
+                }));
+                ret.push({
+                    'xpos': this.width,
+                    'ypos': y(""+t[t.length - 1].rank)
+                });
+                
+                return ret;
+            });
+                
+            var taskColors = d3.scale.quantize<string>()
+                .range(colorbrewer.Set3[12])
+                .domain(d3.range(12).map(d => d))
             
-            var line = d3.svg.line<Ranking>()
-                .x(d => x(d.category))
-                .y(d => y(""+d.rank));   
+            var line = d3.svg.line<RankMin>()
+                .x(d => d.xpos)
+                .y(d => d.ypos);   
             
-            this.chart.selectAll('g.xaxis')
-                .data([xDomain]).enter()
+            var xaxis = this.chart.selectAll('g.xaxis')
+                .data([xDomain]);
+                
+            xaxis.enter()
                 .append('g')
                     .attr('class', 'xaxis axis')
                     .attr('transform', 'translate(0,' + this.height + ')')
                     .call(d3.svg.axis().orient('bottom').scale(x));
+            xaxis.exit().remove();
                     
-            var taskGroups = this.chart.selectAll('g.tasks')
-                .data(this.rankings).enter()
+            var taskGroups = this.chart.selectAll('g.task')
+                .data(rankingData).enter()
                 .append('g')
-                    .attr('class', 'tasks');
+                    .attr('class', 'task');
                     
             taskGroups.append('path')
                 .attr('class', 'line')
-                .style('stroke', d => taskColors(""+d[0].task_id))
+                .style('stroke', d => taskColors(d[0].task_id))
                 .attr('d', line);
+                
+            // add the task name to every connection, and draw them on top
+            this.chart.selectAll('g.alllabels').remove();
+            var labelGroup = this.chart.append('g')
+                .attr('class', 'alllabels');
+            
+            var taskLabels = labelGroup.selectAll('.tasklabels')
+                .data(rankingData).enter()
+                .append('g')
+                    .attr('class', 'tasklabels');
+
+            taskLabels.selectAll('.tasklabel')
+                .data<RankMin>(d => d).enter()            
+                .append('text')
+                    .attr('class', 'tasklabel')
+                    .attr('transform', d => "translate(" + d.xpos + ","+ d.ypos + ")")
+                    .attr('dy', '.35em')
+                    .text(d => d.task);
         }
     }
 }
