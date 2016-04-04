@@ -40,6 +40,9 @@ $(document).ready(() => {
         tableData.av2 = +d3.select("#attrib_val2").property('value');
         tableData.a2 = +d3.select("#attrib2").property('value');
         
+        // keep the original av1 value (before switching) for the ranking vis
+        var origAV1 = tableData.av1;
+        
         // make sure av1 is always smaller (for DB access) swap if so
         if (tableData.av1 > tableData.av2) {
             var tmp;
@@ -55,7 +58,8 @@ $(document).ready(() => {
             $("#a2").html($("#attrib2 option:selected").text());
             
             $.getJSON("utils/getTaskRationale.php", {"av1": tableData.av1, "av2": tableData.av2}, tableData.populateReasons);
-            tableData.rankingVis.getRankings(tableData.av1, tableData.a2);
+            
+            tableData.rankingVis.getRankings(origAV1, tableData.a2);
         }
     });
 });

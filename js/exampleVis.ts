@@ -113,7 +113,8 @@ module Scattertasks {
 				var x: number, y: number;
 				while (firstRun || 
 					Math.abs(x - xMean) > xDev * xMD || 
-					Math.abs(y - yMean) > yDev * yMD) 
+					Math.abs(y - yMean) > yDev * yMD ||
+                    x < 0 || x > 10 || y < 0 || y > 10)
 				{
 					firstRun = false;
 					var u1 = Math.random();

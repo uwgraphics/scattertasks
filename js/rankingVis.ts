@@ -86,8 +86,6 @@ module Scattertasks {
         updateVis() {
             console.log("updating ranking vis");
             
-            this.chart.selectAll("g.tasks").remove();
-            
             var xDomain = this.rankings[0].map(e => e.category);
             var yDomain = d3.range(12).map(d => "" + d);
             
@@ -124,22 +122,21 @@ module Scattertasks {
                 
             var taskColors = d3.scale.quantize<string>()
                 .range(colorbrewer.Set3[12])
-                .domain(d3.range(12).map(d => d))
+                .domain(d3.range(1,13).map(d => d))
             
             var line = d3.svg.line<RankMin>()
                 .x(d => d.xpos)
                 .y(d => d.ypos);   
             
-            var xaxis = this.chart.selectAll('g.xaxis')
-                .data([xDomain]);
-                
-            xaxis.enter()
+            this.chart.selectAll('g.xaxis').remove();
+            this.chart.selectAll('g.xaxis')
+                .data([xDomain]).enter()
                 .append('g')
                     .attr('class', 'xaxis axis')
                     .attr('transform', 'translate(0,' + this.height + ')')
                     .call(d3.svg.axis().orient('bottom').scale(x));
-            xaxis.exit().remove();
-                    
+            
+            this.chart.selectAll("g.task").remove();
             var taskGroups = this.chart.selectAll('g.task')
                 .data(rankingData).enter()
                 .append('g')
