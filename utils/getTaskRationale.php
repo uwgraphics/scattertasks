@@ -12,7 +12,7 @@ $av1 = intval($_GET['av1']);
 $av2 = intval($_GET['av2']);
 
 $query = '
- SELECT r.rationale_id, t.task_id, t.task_name, k.ranking_name, r.rationale, r.strategies
+ SELECT r.rationale_id, t.task_id, t.task_display_order, t.task_name, k.ranking_name, r.rationale, r.strategies
    FROM rationales AS r
    JOIN task_ranking AS k
      ON k.ranking_id = r.ranking_id

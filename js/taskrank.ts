@@ -1,6 +1,7 @@
 module Scattertasks {
     interface AbstractTasks {
         task_id: number;
+        task_display_order: number;
         task_name: string;
         description?: string;
     }
@@ -41,6 +42,7 @@ module Scattertasks {
     interface Rationale {
         rationale_id: number;
         task_id: number;
+        task_display_order: number;
         ranking_name: string;
         rationale: string;
         strategies?: string;
@@ -101,6 +103,7 @@ module Scattertasks {
                     return <Rationale>{
                         rationale_id: 0, 
                         task_id: t.task_id, 
+                        task_display_order: t.task_display_order,
                         task_name: t.task_name,
                         ranking_name: "??", 
                         rationale: "??", 
@@ -119,7 +122,11 @@ module Scattertasks {
             this.tableSelector.selectAll('tr.reason').remove();
             
             // set up the default stuff (if no data for this data parameter pair and task exists in DB
-            var reasons = this.tableSelector.selectAll('tr.reason').data(data, d => d.task_id.toString());
+            var reasons = this.tableSelector.selectAll('tr.reason')
+                .data(
+                    data.sort((a,b) => a.task_display_order - b.task_display_order),
+                    d => d.task_id.toString()
+                );
             var newReasons = reasons.enter()
                 .append('tr')
                 .attr('class', d => {
@@ -139,7 +146,7 @@ module Scattertasks {
                 
             newReasons.append('th')
                 .attr('scope', 'row')
-                .html(d => d.task_id.toString());
+                .html(d => d.task_display_order.toString());
                 
             newReasons.append('td')
                 .html(d => d.task_name);
