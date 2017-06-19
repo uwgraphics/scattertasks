@@ -106,32 +106,43 @@ module Scattertasks {
 			} else if (typeof maxMultipleDev === 'number') {
 				xMD = yMD = maxMultipleDev;
 			}
-			
-			
+
+			// step 1: generate the points using Box-Muller method
 			for (var i = 0; i < numPoints; i++) {
-				var firstRun = true;
-				var x: number, y: number;
-				while (firstRun || 
-					Math.abs(x - xMean) > xDev * xMD || 
-					Math.abs(y - yMean) > yDev * yMD ||
-                    x < 0 || x > 10 || y < 0 || y > 10)
-				{
-					firstRun = false;
+				var x, y: number;
+
+				// discard points outside of two stdev (see Resnick2010)
+				do {
 					var u1 = Math.random();
 					var u2 = Math.random();
-					x = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2) * xDev + xMean;
-					y = Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2) * yDev + yMean;
-					
-					// use λ to create noise (see Rensink2010)
-                    y = (λ * x + (1 - λ) * y) / Math.sqrt(λ * λ + Math.pow(1 - λ, 2));
-				}
 				
+					x = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+					y = Math.sqrt(-2 * Math.log(u1)) * Math.sin(2 * Math.PI * u2);
+				} while (Math.abs(x) > 2 || Math.abs(y) > 2);
+
 				points.push({
 					x: x,
 					y: y,
 					category: classLabel
 				});
 			}
+
+			// step 2: standardize the points so that mean is 0 and stdev is 1
+			var mean_x = d3.mean(points, d => d.x);
+			var mean_y = d3.mean(points, d => d.y);
+			var std_x = d3.deviation(points, d => d.x);
+			var std_y = d3.deviation(points, d => d.y);
+			points.forEach(d => {
+				d.x = (d.x - mean_x) / std_x;
+				d.y = (d.y - mean_y) / std_y;
+
+				// step 3: move to desired mean + stdev
+				d.x = d.x * xDev + xMean;
+				d.y = d.y * yDev + yMean;
+
+				// step 4: use λ to create noise (see Rensink2010) based on given r-value
+				d.y = (λ * d.x + (1 - λ) * d.y) / Math.sqrt(λ * λ + Math.pow(1 - λ, 2));
+			})
 			
 			return points;
 		}
